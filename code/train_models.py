@@ -18,12 +18,12 @@ def random_forest_classifier(df):
     start_date = pd.to_datetime('2003-02-02')
     end_date = pd.to_datetime('2016-01-02')
 
-    threshold = 0.7 
+    threshold = 0.9 
     
     df = df.drop(columns=['touch_lower', 'touch_upper'])
     df = df.dropna( how='all')
 
-    df =df[30:]
+    df =df[60:]
 
     # Splitting data
     train_datasets, test_datasets, weights = crossvalidation.run_split_process(df)
@@ -73,8 +73,8 @@ def random_forest_classifier(df):
         
         
         # Initialize and train the RandomForestClassifier
-        clf = RandomForestClassifier(n_estimators=1500, bootstrap=False, random_state=50, 
-                                     class_weight='balanced_subsample', criterion='log_loss', n_jobs=-1)
+        clf = RandomForestClassifier(n_estimators=2000, bootstrap=False, random_state=50, 
+                                     class_weight='balanced_subsample', criterion='gini', n_jobs=-1)
         clf.fit(X_train, y_train, sample_weight=weights)
 
        
@@ -119,9 +119,17 @@ def random_forest_classifier(df):
 
 
     # After processing all splits, compute overall metrics
+    '''
     joblib.dump(clf, 'models/SPY/random_forest_model_up_SPY.pkl')
     joblib.dump(pca, 'models/SPY/pca_transformation_up_SPY.pkl')
     joblib.dump(scaler, 'models/SPY/scaler_SPY.pkl')
+    '''
+
+    file_input = "/mnt/volume_nyc1_02"
+
+    joblib.dump(clf, f'{file_input}/models/SPY/random_forest_model_up_SPY.pkl')
+    joblib.dump(pca, f'{file_input}/models/SPY/pca_transformation_up_SPY.pkl')
+    joblib.dump(scaler, f'{file_input}/models/SPY/scaler_SPY.pkl')
 
     print(predictions_df)
     print("\nOverall Classification Report:")
