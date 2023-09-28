@@ -18,7 +18,7 @@ def random_forest_classifier(df):
     start_date = pd.to_datetime('2003-02-02')
     end_date = pd.to_datetime('2016-01-02')
 
-    threshold = 0.9 
+    threshold = 0.7 
     
     df = df.drop(columns=['touch_lower', 'touch_upper'])
     df = df.dropna( how='all')
