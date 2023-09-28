@@ -73,7 +73,7 @@ def random_forest_classifier(df):
         
         
         # Initialize and train the RandomForestClassifier
-        clf = RandomForestClassifier(n_estimators=2000, bootstrap=False, random_state=50, 
+        clf = RandomForestClassifier(n_estimators=100, bootstrap=False, random_state=50, 
                                      class_weight='balanced_subsample', criterion='gini', n_jobs=-1)
         clf.fit(X_train, y_train, sample_weight=weights)
 
