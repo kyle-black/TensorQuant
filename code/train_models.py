@@ -23,7 +23,7 @@ def random_forest_classifier(df):
     df = df.drop(columns=['touch_lower', 'touch_upper'])
     df = df.dropna( how='all')
 
-    df =df[6000:]
+    df =df[2000:]
 
     # Splitting data
     train_datasets, test_datasets, weights = crossvalidation.run_split_process(df)
