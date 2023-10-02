@@ -1,118 +1,91 @@
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.metrics import classification_report, confusion_matrix, brier_score_loss
 import pandas as pd
+# assuming crossvalidation and bootstrap are custom modules
 import crossvalidation
-import boostrap
-from sklearn.metrics import brier_score_loss
-
+#import bootstrap
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
+from sklearn.svm import SVC
 import joblib
-from sklearn.metrics import brier_score_loss
+
 def random_forest_classifier(df):
-    
-    
     
     # Data Preprocessing
     start_date = pd.to_datetime('2003-02-02')
     end_date = pd.to_datetime('2016-01-02')
-
     threshold = 0.7 
     
     df = df.drop(columns=['touch_lower', 'touch_upper'])
-    df = df.dropna( how='all')
-
-    df =df[60:]
-
+    df = df.dropna(how='all')
+    df = df[60:]
+    
     # Splitting data
     train_datasets, test_datasets, weights = crossvalidation.run_split_process(df)
-
-
+    # train_datasets = bootstrap.sequential_bootstrap_with_rebalance(train_datasets)    
     
-
-    #train_datasets = boostrap.sequential_bootstrap_with_rebalance(train_datasets)    
-    
-    feature_cols = ['Daily_Returns', 'Middle_Band', 'Upper_Band', 'Lower_Band',
-                    'Log_Returns', 'MACD', 'Signal_Line_MACD', 'RSI','SpreadOC','SpreadLH']
+    feature_cols = ['Daily_Returns', 'Middle_Band', 'Upper_Band', 'Lower_Band', 'Log_Returns', 'MACD', 'Signal_Line_MACD', 'RSI', 'SpreadOC', 'SpreadLH']
     target_col = "label"
-    
-    
-
     
     all_predictions = []
     all_actuals = []
     all_preds = []
     n_components = 6
     scaler = StandardScaler()
+    
+    # Define a parameter grid for GridSearchCV
+    param_grid = {
+        'C': [0.1, 1, 10, 100], 
+        'gamma': ['scale', 'auto', 0.1, 1, 10, 100], 
+        'kernel': ['linear', 'rbf']  
+    }
 
     # Training and Predicting for each split
     for train, test, weights in zip(train_datasets, test_datasets, weights):
-
-        
         X_train = train[feature_cols]
         y_train = train[target_col]
-
         X_test = test[feature_cols]
         y_test = test[target_col]
 
-           # Standardize the data
+        # Standardize the data
         X_train = scaler.fit_transform(X_train)
-        X_test = scaler.transform(X_test)  # IMPORTANT: use transform, not fit_transform
+        X_test = scaler.transform(X_test)
 
         # Apply PCA
         pca = PCA(n_components=n_components)
         X_train = pca.fit_transform(X_train)
-        X_test = pca.transform(X_test)  # Again, just transform
+        X_test = pca.transform(X_test)
 
-        
-        
-        
-        
-        
-        
-        
-        # Initialize and train the RandomForestClassifier
-        clf = RandomForestClassifier(n_estimators=2000, bootstrap=False, random_state=50, 
-                                     class_weight='balanced_subsample', criterion='gini', n_jobs=-1)
-        clf.fit(X_train, y_train, sample_weight=weights)
+        # Initialize GridSearchCV
+        clf = SVC(probability=True)
+        grid_search = GridSearchCV(clf, param_grid, cv=5, verbose=2, n_jobs=-1)
+        grid_search.fit(X_train, y_train)
 
-       
-
-        #print('ypreds:',y_pred)
-        #print('ytest:',y_test)
-        probas = clf.predict_proba(X_test)
+        # Use the best estimator to predict
+        best_svm = grid_search.best_estimator_
+        print('best svm:',best_svm)
+        probas = best_svm.predict_proba(X_test)
 
         y_pred = (probas[:, 1] >= threshold).astype(int)
-        
+
+        # Print and store results
         print('######################')
-        print('probas:',probas)
+        print('probas:', probas)
         print(classification_report(y_test, y_pred, zero_division=1))
         print('Confusion Matrix:', confusion_matrix(y_test, y_pred))
-
-        predicted_probabilities = probas[:, 1]  # Assuming positive class is the second one
-        
-        print('predicted_probs:',predicted_probabilities)
-        print('y_test:',y_test)
+        predicted_probabilities = probas[:, 1]
+        print('predicted_probs:', predicted_probabilities)
+        print('y_test:', y_test)
         brier_score = brier_score_loss(y_test, predicted_probabilities)
         print('Brier Score:', brier_score)
 
-
-        # Storing feature importances
-        importances = clf.feature_importances_
-        for feature, importance in sorted(zip(feature_cols, importances), key=lambda x: x[1], reverse=True):
-            print(f"{feature}: {importance:.4f}")
-
-        # Storing predictions for each split
         predictions_df = pd.DataFrame({
-           # 'Date': X_test.index,
             'Actual': y_test,
             'Predictions': y_pred
-           # 'Brier Score': brier_score
         })
         all_predictions.append(predictions_df)
 
-        # Store actuals and predictions for computing overall metrics
         all_actuals.extend(y_test.tolist())
         all_preds.extend(y_pred.tolist())
         print('###########################')
@@ -124,13 +97,12 @@ def random_forest_classifier(df):
     joblib.dump(pca, 'models/SPY/pca_transformation_up_SPY.pkl')
     joblib.dump(scaler, 'models/SPY/scaler_SPY.pkl')
     '''
-
     file_input = "/mnt/volume_nyc1_02"
-
+    
     joblib.dump(clf, f'{file_input}/models/SPY/random_forest_model_up_SPY.pkl')
     joblib.dump(pca, f'{file_input}/models/SPY/pca_transformation_up_SPY.pkl')
     joblib.dump(scaler, f'{file_input}/models/SPY/scaler_SPY.pkl')
-
+    
     print(predictions_df)
     print("\nOverall Classification Report:")
     print(classification_report(all_actuals, all_preds, zero_division=1))
