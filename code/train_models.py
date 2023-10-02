@@ -40,9 +40,90 @@ def random_forest_classifier(df):
         'gamma': ['scale', 'auto', 0.1, 1, 10, 100], 
         'kernel': ['linear', 'rbf']  
     }
+    #for train, test, weights in zip(train_datasets[-1], test_datasets[-1], weights[-1]):
+    
+    train = train_datasets[-1]
+    test = test_datasets[-1]
+    weights = weights[-1]
+    
+    
+    
+    
+    X_train = train[feature_cols]
+    y_train = train[target_col]
+    X_test = test[feature_cols]
+    y_test = test[target_col]
 
+    # Standardize the data
+    X_train = scaler.fit_transform(X_train)
+    X_test = scaler.transform(X_test)
+
+    # Apply PCA
+    pca = PCA(n_components=n_components)
+    X_train = pca.fit_transform(X_train)
+    X_test = pca.transform(X_test)
+
+    # Initialize GridSearchCV
+    clf = SVC(probability=True)
+    grid_search = GridSearchCV(clf, param_grid, cv=5, verbose=2, n_jobs=-1)
+    grid_search.fit(X_train, y_train)
+
+    # Use the best estimator to predict
+    best_svm = grid_search.best_estimator_
+    print('best svm:',best_svm)
+    probas = best_svm.predict_proba(X_test)
+
+    y_pred = (probas[:, 1] >= threshold).astype(int)
+
+    # Print and store results
+    print('######################')
+    print('probas:', probas)
+    print(classification_report(y_test, y_pred, zero_division=1))
+    print('Confusion Matrix:', confusion_matrix(y_test, y_pred))
+    predicted_probabilities = probas[:, 1]
+    print('predicted_probs:', predicted_probabilities)
+    print('y_test:', y_test)
+    brier_score = brier_score_loss(y_test, predicted_probabilities)
+    print('Brier Score:', brier_score)
+
+    predictions_df = pd.DataFrame({
+        'Actual': y_test,
+        'Predictions': y_pred
+    })
+    all_predictions.append(predictions_df)
+
+    all_actuals.extend(y_test.tolist())
+    all_preds.extend(y_pred.tolist())
+    print('###########################')
+
+
+    # After processing all splits, compute overall metrics
+    '''
+    joblib.dump(clf, 'models/SPY/random_forest_model_up_SPY.pkl')
+    joblib.dump(pca, 'models/SPY/pca_transformation_up_SPY.pkl')
+    joblib.dump(scaler, 'models/SPY/scaler_SPY.pkl')
+    '''    
+    file_input = "/mnt/volume_nyc1_02"
+    
+    joblib.dump(clf, f'{file_input}/models/SPY/random_forest_model_up_SPY.pkl')
+    joblib.dump(pca, f'{file_input}/models/SPY/pca_transformation_up_SPY.pkl')
+    joblib.dump(scaler, f'{file_input}/models/SPY/scaler_SPY.pkl')
+    '''
+    print(predictions_df)
+    print("\nOverall Classification Report:")
+    print(classification_report(all_actuals, all_preds, zero_division=1))
+    print('Overall Confusion Matrix:', confusion_matrix(all_actuals, all_preds))
+
+    
+    # Combining all predictions and saving
+    final_predictions_df = pd.concat(all_predictions)
+    final_predictions_df.to_csv('predictions.csv', index=False)
+
+
+    '''
+    '''
     # Training and Predicting for each split
-    for train, test, weights in zip(train_datasets, test_datasets, weights):
+    for train, test, weights in zip(train_datasets[-1], test_datasets[-1], weights[-1]):
         X_train = train[feature_cols]
         y_train = train[target_col]
         X_test = test[feature_cols]
@@ -92,17 +173,17 @@ def random_forest_classifier(df):
 
 
     # After processing all splits, compute overall metrics
-    '''
+    
     joblib.dump(clf, 'models/SPY/random_forest_model_up_SPY.pkl')
     joblib.dump(pca, 'models/SPY/pca_transformation_up_SPY.pkl')
     joblib.dump(scaler, 'models/SPY/scaler_SPY.pkl')
-    '''
+    
     file_input = "/mnt/volume_nyc1_02"
-    
-    joblib.dump(clf, f'{file_input}/models/SPY/random_forest_model_up_SPY.pkl')
-    joblib.dump(pca, f'{file_input}/models/SPY/pca_transformation_up_SPY.pkl')
-    joblib.dump(scaler, f'{file_input}/models/SPY/scaler_SPY.pkl')
-    
+    '''
+   # joblib.dump(clf, f'{file_input}/models/SPY/random_forest_model_up_SPY.pkl')
+   # joblib.dump(pca, f'{file_input}/models/SPY/pca_transformation_up_SPY.pkl')
+   # joblib.dump(scaler, f'{file_input}/models/SPY/scaler_SPY.pkl')
+    '''
     print(predictions_df)
     print("\nOverall Classification Report:")
     print(classification_report(all_actuals, all_preds, zero_division=1))
@@ -112,7 +193,7 @@ def random_forest_classifier(df):
     # Combining all predictions and saving
     final_predictions_df = pd.concat(all_predictions)
     final_predictions_df.to_csv('predictions.csv', index=False)
-  
+    '''
 
 
 
