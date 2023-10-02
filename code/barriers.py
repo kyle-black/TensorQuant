@@ -141,10 +141,10 @@ def apply_triple_barrier(df, pt_sl, num_days_active):
       #  barriers.at[timestamp, 'cross_above_ma'] = cross_above_ma
       #  barriers.at[timestamp, 'cross_below_ma'] = cross_below_ma
 
-        #if touch_lower != pd.NaT and (touch_upper == pd.NaT or touch_lower < touch_upper) and touch_lower < t1_date:
-        #    barriers.at[timestamp, 'label'] = 1
-        if touch_upper != pd.NaT and (touch_lower == pd.NaT or touch_upper < touch_lower) and touch_upper < t1_date:
+        if touch_lower != pd.NaT and (touch_upper == pd.NaT or touch_lower < touch_upper) and touch_lower < t1_date:
             barriers.at[timestamp, 'label'] = 1
+        #if touch_upper != pd.NaT and (touch_lower == pd.NaT or touch_upper < touch_lower) and touch_upper < t1_date:
+        #    barriers.at[timestamp, 'label'] = 1
         else:
             barriers.at[timestamp, 'label'] = 0
         
