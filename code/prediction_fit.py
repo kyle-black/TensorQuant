@@ -26,9 +26,14 @@ def make_predictions_up(symbol, new_data: pd.DataFrame) -> pd.Series:
     """
 
     # Load the trained model, PCA, and scaler
-    clf = joblib.load(f'models/{symbol}/random_forest_model_up_{symbol}.pkl')
-    pca = joblib.load(f'models/{symbol}/pca_transformation_up_{symbol}.pkl')
-    scaler = joblib.load(f'models/{symbol}/scaler_{symbol}.pkl')
+    #clf = joblib.load(f'models/{symbol}/random_forest_model_up_{symbol}.pkl')
+    #pca = joblib.load(f'models/{symbol}/pca_transformation_up_{symbol}.pkl')
+    #scaler = joblib.load(f'models/{symbol}/scaler_{symbol}.pkl')
+    file_input = "/mnt/volume_nyc1_02"
+
+    clf =joblib.load( f'{file_input}/models/SPY/random_forest_model_dwn_SPY.pkl')
+    pca = joblib.load( f'{file_input}/models/SPY/pca_transformation_dwn_SPY.pkl')
+    scaler = joblib.load( f'{file_input}/models/SPY/scaler_SPY.pkl')
     
     # Prepare the new data
     feature_cols = ['Daily_Returns', 'Middle_Band', 'Upper_Band', 'Lower_Band',
