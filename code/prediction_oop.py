@@ -102,7 +102,7 @@ class Labeling:
         
 
     def triple_barriers(self):
-        self.triple_result =barriers.apply_triple_barrier(self.bars_df,[1,1,1], 10)
+        self.triple_result =barriers.apply_triple_barrier(self.bars_df,[1,1,1], 30)
         return self.triple_result
     
     def sample_weights(self):
