@@ -31,8 +31,8 @@ def make_predictions_up(symbol, new_data: pd.DataFrame) -> pd.Series:
     #scaler = joblib.load(f'models/{symbol}/scaler_{symbol}.pkl')
     file_input = "/mnt/volume_nyc1_02"
 
-    clf =joblib.load( f'{file_input}/models/SPY/random_forest_model_dwn_SPY.pkl')
-    pca = joblib.load( f'{file_input}/models/SPY/pca_transformation_dwn_SPY.pkl')
+    clf =joblib.load( f'{file_input}/models/SPY/support_vector_classifier_up_SPY.pkl')
+    pca = joblib.load( f'{file_input}/models/SPY/pca_transformation_up_SPY.pkl')
     scaler = joblib.load( f'{file_input}/models/SPY/scaler_SPY.pkl')
     
     # Prepare the new data
