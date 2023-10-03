@@ -25,6 +25,8 @@ def make_predictions_up(symbol, new_data: pd.DataFrame) -> pd.Series:
     - pd.Series: Predictions for the new data.
     """
 
+    threshold = 0.7 
+
     # Load the trained model, PCA, and scaler
     #clf = joblib.load(f'models/{symbol}/random_forest_model_up_{symbol}.pkl')
     #pca = joblib.load(f'models/{symbol}/pca_transformation_up_{symbol}.pkl')
@@ -49,6 +51,8 @@ def make_predictions_up(symbol, new_data: pd.DataFrame) -> pd.Series:
     # Make predictions using the loaded model
     predictions = clf.predict(X_new)
     probas = clf.predict_proba(X_new)
+
+    predictions = (probas[:, 0] >= threshold).astype(int)
     
     return predictions, probas
 
