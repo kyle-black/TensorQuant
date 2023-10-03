@@ -52,7 +52,7 @@ def make_predictions_up(symbol, new_data: pd.DataFrame) -> pd.Series:
     predictions = clf.predict(X_new)
     probas = clf.predict_proba(X_new)
 
-    predictions = (probas[:, 0] >= threshold).astype(int)
+    predictions = (probas[:, 1] >= threshold).astype(int)
     
     return predictions, probas
 
