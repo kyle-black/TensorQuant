@@ -105,8 +105,8 @@ def random_forest_classifier(df):
     '''    
     file_input = "/mnt/volume_nyc1_02"
     
-    joblib.dump(best_svm, f'{file_input}/models/SPY/support_vector_classifier_dwn_SPY.pkl')
-    joblib.dump(pca, f'{file_input}/models/SPY/pca_transformation_dwn_SPY.pkl')
+    joblib.dump(best_svm, f'{file_input}/models/SPY/support_vector_classifier_up_SPY.pkl')
+    joblib.dump(pca, f'{file_input}/models/SPY/pca_transformation_up_SPY.pkl')
     joblib.dump(scaler, f'{file_input}/models/SPY/scaler_SPY.pkl')
     '''
     print(predictions_df)
