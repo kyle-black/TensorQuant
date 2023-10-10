@@ -131,7 +131,7 @@ class Model:
 
 
 if __name__ == "__main__":
-    stock = pd.read_csv('data/EURUSD.csv')
+    stock = pd.read_csv('data/SPY.csv')
     stock.dropna(inplace=True)
 
     #print(stock.isna().any())
