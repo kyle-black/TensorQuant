@@ -99,8 +99,8 @@ def random_forest_classifier(df):
 
     # After processing all splits, compute overall metrics
     '''
-    joblib.dump(clf, 'models/SPY/random_forest_model_up_SPY.pkl')
-    joblib.dump(pca, 'models/SPY/pca_transformation_up_SPY.pkl')
+    joblib.dump(clf, 'models/SPY/random_forest_model_dwn_SPY.pkl')
+    joblib.dump(pca, 'models/SPY/pca_transformation_dwn_SPY.pkl')
     joblib.dump(scaler, 'models/SPY/scaler_SPY.pkl')
     '''    
     file_input = "/mnt/volume_nyc1_02"
