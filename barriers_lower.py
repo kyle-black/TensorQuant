@@ -157,8 +157,3 @@ def apply_triple_barrier(df, pt_sl, num_days_active):
     df_merged = df.join(barriers, how='left')
     return df_merged
 
-
-
-
-
-
