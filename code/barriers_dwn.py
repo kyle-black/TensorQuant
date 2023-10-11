@@ -86,7 +86,7 @@ def apply_triple_barrier(df, pt_sl, num_days_active):
     # Ensure the index is a DatetimeIndex
     #df.set_index('Date', inplace=True)
     #return df['Date']
-    df.set_index('Date', inplace=True)
+    #df.set_index('Date', inplace=True)
     
     
     df.index = pd.to_datetime(df.index)
@@ -128,8 +128,8 @@ def apply_triple_barrier(df, pt_sl, num_days_active):
 
         df_temp = df.loc[timestamp:t1_date]
         
-        touch_upper = df_temp[df_temp['Close'] >= upper_barrier].index.min()
-        touch_lower = df_temp[df_temp['Close'] <= lower_barrier].index.min()
+        touch_upper = df_temp[df_temp['High'] >= upper_barrier].index.min()
+        touch_lower = df_temp[df_temp['Low'] <= lower_barrier].index.min()
 
        # cross_above_ma = df_temp[(df_temp['Close'].shift(1) < df_temp['Middle_Band']) & (df_temp['Close'] > df_temp['Middle_Band'])].index.min()
        # cross_below_ma = df_temp[(df_temp['Close'].shift(1) > df_temp['Middle_Band']) & (df_temp['Close'] < df_temp['Middle_Band'])].index.min()
@@ -141,11 +141,10 @@ def apply_triple_barrier(df, pt_sl, num_days_active):
       #  barriers.at[timestamp, 'cross_above_ma'] = cross_above_ma
       #  barriers.at[timestamp, 'cross_below_ma'] = cross_below_ma
 
-        #if touch_lower != pd.NaT and (touch_upper == pd.NaT or touch_lower < touch_upper) and touch_lower < t1_date:
-        #    barriers.at[timestamp, 'label'] = 1
-        if touch_upper != pd.NaT and (touch_lower == pd.NaT or touch_upper < touch_lower) and touch_upper < t1_date:
-       
+        if touch_lower != pd.NaT and (touch_upper == pd.NaT or touch_lower < touch_upper) and touch_lower < t1_date:
             barriers.at[timestamp, 'label'] = 1
+        #if touch_upper != pd.NaT and (touch_lower == pd.NaT or touch_upper < touch_lower) and touch_upper < t1_date:
+        #    barriers.at[timestamp, 'label'] = 1
         else:
             barriers.at[timestamp, 'label'] = 0
         
@@ -157,9 +156,4 @@ def apply_triple_barrier(df, pt_sl, num_days_active):
     
     df_merged = df.join(barriers, how='left')
     return df_merged
-
-
-
-
-
 

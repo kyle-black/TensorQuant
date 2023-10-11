@@ -9,7 +9,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy.stats import norm
 from statsmodels.tsa.stattools import adfuller
-import barriers
+import barriers_upper
+import barriers_dwn
 import features
 from train_models import random_forest_classifier #, adaboost_classifier, random_forest_ts #, random_forest_anomaly_detector
 from weights import return_attribution
@@ -102,8 +103,9 @@ class Labeling:
         
 
     def triple_barriers(self):
-        self.triple_result =barriers.apply_triple_barrier(self.bars_df,[1,1,1], 30)
-        return self.triple_result
+        self.triple_result_up =barriers_upper.apply_triple_barrier(self.bars_df,[1,1,1], 30)
+        self.triple_result_dwn =barriers_dwn.apply_triple_barrier(self.bars_df,[1,1,1], 30)
+        return self.triple_result_up, self.triple_result_dwn
     
     def sample_weights(self):
         self.triple_result = self.triple_barriers()
@@ -128,7 +130,7 @@ class Model:
     def predict_values(self):
         self.predictions, self.probas =prediction_fit.make_predictions_up(self.symbol,self.bars_df)
         self.predictions_dwn, self.probas_dwn =prediction_fit.make_predictions_dwn(self.symbol,self.bars_df)
-        return self.predictions, self.probas, self.predictions_dwn, self.probas_dwn, self.bars_df['upper_barrier'], self.bars_df['lower_barrier'], self.bars_df['price'], self.bars_df['volatility']
+        return self.predictions, self.probas, self.bars_df['upper_barrier'], self.bars_df['lower_barrier'], self.bars_df['price'], self.bars_df['volatility']
 
     
 
@@ -164,13 +166,19 @@ if __name__ == "__main__":
        'RSI']]
     
     label_instance_time =Labeling(feature_bars)
-    label_instance_time = label_instance_time.triple_barriers()
+    label_instance_up, label_instance_dwn = label_instance_time.triple_barriers()
     
 
-    print(label_instance_time)
+    #print(label_instance_time)
     
-    model =Model(symbol,label_instance_time)
-    print(model.predict_values())
+    model =Model(symbol,label_instance_up)
+    print('up predictions:',model.predict_values())
+
+
+    model =Model(symbol,label_instance_dwn)
+    print('down predictions:',model.predict_values())
+
+
     
     
 
