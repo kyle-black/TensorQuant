@@ -19,7 +19,7 @@ def random_forest_classifier(df):
     
     df = df.drop(columns=['touch_lower', 'touch_upper'])
     df = df.dropna(how='all')
-    df = df[60:]
+    df = df[100:]
     
     # Splitting data
     train_datasets, test_datasets, weights = crossvalidation.run_split_process(df)
@@ -107,9 +107,9 @@ def random_forest_classifier(df):
     '''    
     file_input = "/mnt/volume_nyc1_02"
     
-    joblib.dump(clf, f'{file_input}/models/EURUSD/support_vector_classifier_up_EURUSD.pkl')
-    joblib.dump(pca, f'{file_input}/models/EURUSD/pca_transformation_up_EURUSD.pkl')
-    joblib.dump(scaler, f'{file_input}/models/EURUSD/scaler_EURUSD.pkl')
+    joblib.dump(clf, f'{file_input}/models/SPY/support_vector_classifier_up_SPY.pkl')
+    joblib.dump(pca, f'{file_input}/models/SPY/pca_transformation_up_SPY.pkl')
+    joblib.dump(scaler, f'{file_input}/models/SPY/scaler_SPY.pkl')
     '''
     print(predictions_df)
     print("\nOverall Classification Report:")
