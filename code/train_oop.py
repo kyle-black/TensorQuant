@@ -169,7 +169,7 @@ if __name__ == "__main__":
     feature_instance_time = FeatureMaker(time_bars_df, 30)
     print(feature_instance_time.feature_add())
     
-    '''
+    
     feature_bars =feature_instance_time.feature_add()
     feature_instance_time.elbow_()
 
@@ -199,7 +199,7 @@ if __name__ == "__main__":
     model =Model(label_instance_time)
     
     print(model.train_model())
-    '''
+    
 
     
 
