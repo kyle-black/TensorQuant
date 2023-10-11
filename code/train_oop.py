@@ -100,7 +100,7 @@ class Labeling:
         
 
     def triple_barriers(self):
-        self.triple_result =barriers.apply_triple_barrier(self.bars_df,[1,1,1], 10)
+        self.triple_result =barriers.apply_triple_barrier(self.bars_df,[1,1,1], 30)
         return self.triple_result
     
     def sample_weights(self):
@@ -131,7 +131,7 @@ class Model:
 
 
 if __name__ == "__main__":
-    stock = pd.read_csv('data/EURUSD.csv')
+    stock = pd.read_csv('data/SPY.csv')
     stock.dropna(inplace=True)
 
     #print(stock.isna().any())
