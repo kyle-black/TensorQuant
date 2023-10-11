@@ -127,12 +127,15 @@ class Model:
         #self.weights =weights
 
 
-    def predict_values(self):
+    def predict_values_up(self):
         self.predictions, self.probas =prediction_fit.make_predictions_up(self.symbol,self.bars_df)
-        self.predictions_dwn, self.probas_dwn =prediction_fit.make_predictions_dwn(self.symbol,self.bars_df)
+        #self.predictions_dwn, self.probas_dwn =prediction_fit.make_predictions_dwn(self.symbol,self.bars_df)
         return self.predictions, self.probas, self.bars_df['upper_barrier'], self.bars_df['lower_barrier'], self.bars_df['price'], self.bars_df['volatility']
 
-    
+    def predict_values_dwn(self):
+        self.predictions, self.probas =prediction_fit.make_predictions_dwn(self.symbol,self.bars_df)
+        #self.predictions_dwn, self.probas_dwn =prediction_fit.make_predictions_dwn(self.symbol,self.bars_df)
+        return self.predictions, self.probas, self.bars_df['upper_barrier'], self.bars_df['lower_barrier'], self.bars_df['price'], self.bars_df['volatility']
 
 
 
@@ -172,11 +175,11 @@ if __name__ == "__main__":
     #print(label_instance_time)
     
     model =Model(symbol,label_instance_up)
-    print('up predictions:',model.predict_values())
+    print('up predictions:',model.predict_values_up())
 
 
     model =Model(symbol,label_instance_dwn)
-    print('down predictions:',model.predict_values())
+    print('down predictions:',model.predict_values_dwn())
 
 
     
