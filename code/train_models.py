@@ -71,9 +71,9 @@ def random_forest_classifier(df):
         #grid_search.fit(X_train, y_train)
 
         # Use the best estimator to predict
-        #best_svm = grid_search.best_estimator_
-        #print('best svm:',best_svm)
-        probas = clf.predict_proba(X_test)
+        best_svm = grid_search.best_estimator_
+        print('best svm:',best_svm)
+        probas = best_svm.predict_proba(X_test)
 
         y_pred = (probas[:, 1] >= threshold).astype(int)
 
