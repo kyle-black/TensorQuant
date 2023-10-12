@@ -36,9 +36,9 @@ def random_forest_classifier(df):
     
     # Define a parameter grid for GridSearchCV
     param_grid = {
-        'C': [ 100], 
+        'C': [ 50], 
         'gamma': [ 'auto'], 
-        'kernel': ['linear', 'rbf']  
+        'kernel': ['linear']  
     }
 
     # Training and Predicting for each split
