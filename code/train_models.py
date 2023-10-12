@@ -58,14 +58,14 @@ def random_forest_classifier(df):
         X_test = pca.transform(X_test)
 
         # Initialize GridSearchCV
-        clf = SVC(probability=True)
-        grid_search = GridSearchCV(clf, param_grid, cv=1, verbose=2, n_jobs=-1)
-        grid_search.fit(X_train, y_train)
+        clf = SVC(probability=True, C=100)
+       # grid_search = GridSearchCV(clf, param_grid, cv=1, verbose=2, n_jobs=-1)
+        clf.fit(X_train, y_train)
 
         # Use the best estimator to predict
-        best_svm = grid_search.best_estimator_
-        print('best svm:',best_svm)
-        probas = best_svm.predict_proba(X_test)
+        #best_svm = grid_search.best_estimator_
+        #print('best svm:',best_svm)
+        probas = clf.predict_proba(X_test)
 
         y_pred = (probas[:, 1] >= threshold).astype(int)
 
