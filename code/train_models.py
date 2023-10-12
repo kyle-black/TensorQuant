@@ -93,15 +93,15 @@ def random_forest_classifier(df):
 
     # After processing all splits, compute overall metrics
     '''
-    joblib.dump(clf, 'models/SPY/random_forest_model_up_SPY.pkl')
-    joblib.dump(pca, 'models/SPY/pca_transformation_up_SPY.pkl')
-    joblib.dump(scaler, 'models/SPY/scaler_SPY.pkl')
+    joblib.dump(clf, 'models/EURUSD/random_forest_model_up_SPY.pkl')
+    joblib.dump(pca, 'models/EURUSD/pca_transformation_up_SPY.pkl')
+    joblib.dump(scaler, 'models/EURUSD/scaler_SPY.pkl')
     '''
     file_input = "/mnt/volume_nyc1_02"
     
-    joblib.dump(clf, f'{file_input}/models/SPY/random_forest_model_up_SPY.pkl')
-    joblib.dump(pca, f'{file_input}/models/SPY/pca_transformation_up_SPY.pkl')
-    joblib.dump(scaler, f'{file_input}/models/SPY/scaler_SPY.pkl')
+    joblib.dump(clf, f'{file_input}/models/EURUSD/support_vector_classifier_up_EURUSD.pkl')
+    joblib.dump(pca, f'{file_input}/models/EURUSD/pca_transformation_up_EURUSD.pkl')
+    joblib.dump(scaler, f'{file_input}/models/EURUSD/scaler_EURUSD.pkl')
     
     print(predictions_df)
     print("\nOverall Classification Report:")
