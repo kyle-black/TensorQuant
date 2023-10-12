@@ -10,7 +10,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
 import joblib
 
-def random_forest_classifier(df):
+def support_vector_classifier(df):
     
     # Data Preprocessing
     start_date = pd.to_datetime('2003-02-02')
@@ -50,7 +50,7 @@ def random_forest_classifier(df):
     for train, test, weights in zip(train_datasets, test_datasets, weights):
         train = train_datasets[-1]
         test = test_datasets[-1]
-        weight = weights[-1] 
+        #weight = weights[-1] 
         
         
         
