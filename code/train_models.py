@@ -35,14 +35,19 @@ def random_forest_classifier(df):
     scaler = StandardScaler()
     
     # Define a parameter grid for GridSearchCV
+    '''
     param_grid = {
         'C': [ 50], 
         'gamma': [ 'auto'], 
         'kernel': ['linear']  
     }
+    '''
+    param_grid = {'C': [0.1, 1, 10, 100, 1000],  
+              'gamma': [1, 0.1, 0.01, 0.001, 0.0001], 
+              'kernel': ['rbf']} 
 
     # Training and Predicting for each split
-    for train, test, weights in zip(train_datasets, test_datasets, weights):
+    for train, test, weights in zip(train_datasets[-1], test_datasets[-1], weights[-1]):
         X_train = train[feature_cols]
         y_train = train[target_col]
         X_test = test[feature_cols]
@@ -58,13 +63,13 @@ def random_forest_classifier(df):
         X_test = pca.transform(X_test)
 
         # Initialize GridSearchCV
-        clf = SVC(probability=True, C=100)
-       # grid_search = GridSearchCV(clf, param_grid, cv=1, verbose=2, n_jobs=-1)
-        clf.fit(X_train, y_train)
+        clf = SVC(probability=True, C=50)
+        grid_search = GridSearchCV(clf, param_grid,refit=True, verbose=3, n_jobs=-1)
+        grid_search.fit(X_train, y_train)
 
         # Use the best estimator to predict
-        #best_svm = grid_search.best_estimator_
-        #print('best svm:',best_svm)
+        best_svm = grid_search.best_estimator_
+        print('best svm:',best_svm)
         probas = clf.predict_proba(X_test)
 
         y_pred = (probas[:, 1] >= threshold).astype(int)
