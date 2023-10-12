@@ -162,17 +162,17 @@ def random_forest_classifier(df):
     #          'kernel': ['rbf']} 
 
     # Training and Predicting for each split
-    for train, test, weights in zip(train_datasets, test_datasets, weights):
-        train = train_datasets
-        test = test_datasets
+    for train_data, test_data, weight_data in zip(train_datasets, test_datasets, weights):
+        #train = train_datasets
+        #test = test_datasets
         #weight = weights[-1] 
         
         
         
-        X_train = train[feature_cols]
-        y_train = train[target_col]
-        X_test = test[feature_cols]
-        y_test = test[target_col]
+        X_train = train_data[feature_cols]
+        y_train = train_data[target_col]
+        X_test = test_data[feature_cols]
+        y_test = test_data[target_col]
 
         # Standardize the data
         X_train = scaler.fit_transform(X_train)
@@ -184,8 +184,8 @@ def random_forest_classifier(df):
         X_test = pca.transform(X_test)
 
         # Initialize GridSearchCV
-        clf = SVC(probability=True, C=50)
-        clf =RandomForestClassifier(n_estimators=1000, weights=weights)
+        #clf = SVC(probability=True, C=50)
+        clf =RandomForestClassifier(n_estimators=1000, weights=weight_data)
         #grid_search = GridSearchCV(clf, param_grid,refit=True, verbose=3, n_jobs=-1)
         clf.fit(X_train, y_train)
 
