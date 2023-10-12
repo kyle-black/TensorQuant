@@ -76,7 +76,7 @@ def support_vector_classifier(df):
         # Use the best estimator to predict
         best_svm = grid_search.best_estimator_
         print('best svm:',best_svm)
-        probas = clf.predict_proba(X_test)
+        probas = best_svm.predict_proba(X_test)
 
         y_pred = (probas[:, 1] >= threshold).astype(int)
 
