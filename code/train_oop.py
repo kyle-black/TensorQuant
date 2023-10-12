@@ -158,12 +158,12 @@ if __name__ == "__main__":
    
 
     
-    analysis_instance_time = Analysis(time_bars_df)
+   # analysis_instance_time = Analysis(time_bars_df)
     #print("Std Dev of Time Bars:", analysis_instance_time.std_dev())
     #print('Jaque Bera test:', analysis_instance_time.jaque_bera() )
     #print('ADF Statistic:', analysis_instance_time.AD_fuller() )
 
-    print('ACF Statistic:', analysis_instance_time.acf() )
+    #print('ACF Statistic:', analysis_instance_time.acf() )
 
 
     feature_instance_time = FeatureMaker(time_bars_df, 30)
