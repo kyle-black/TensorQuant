@@ -66,8 +66,8 @@ def random_forest_classifier(df):
         # Initialize GridSearchCV
         clf = SVC(probability=True)
        # clf = RandomForestClassifier(n_estimators=1000)
-        #grid_search = GridSearchCV(clf, param_grid, cv=5, verbose=2, n_jobs=-1)
-        clf.fit(X_train, y_train)
+        grid_search = GridSearchCV(clf, param_grid, cv=5, verbose=2, n_jobs=-1)
+        grid_search.fit(X_train, y_train)
         #grid_search.fit(X_train, y_train)
 
         # Use the best estimator to predict
