@@ -36,8 +36,8 @@ def random_forest_classifier(df):
     
     # Define a parameter grid for GridSearchCV
     param_grid = {
-        'C': [0.1, 1, 10, 100], 
-        'gamma': ['scale', 'auto', 0.1, 1, 10, 100], 
+        'C': [ 100], 
+        'gamma': [ 'auto'], 
         'kernel': ['linear', 'rbf']  
     }
 
