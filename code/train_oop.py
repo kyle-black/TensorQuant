@@ -11,7 +11,7 @@ from scipy.stats import norm
 from statsmodels.tsa.stattools import adfuller
 import barriers
 import features
-from train_models import random_forest_classifier #, adaboost_classifier, random_forest_ts #, random_forest_anomaly_detector
+from train_models import random_forest_classifier, support_vector_classifier #, adaboost_classifier, random_forest_ts #, random_forest_anomaly_detector
 from weights import return_attribution
 
 from autocorrelation import compute_and_plot_acf
@@ -120,7 +120,7 @@ class Model:
     def train_model(self):
         #output =adaboost_classifier(self.bars_df)
         #output = random_forest_classifier(self.bars_df)
-        output =random_forest_classifier(self.bars_df)
+        output =support_vector_classifier(self.bars_df)
      
         #output =random_forest_anomaly_detector(self.bars_df)
         return output
