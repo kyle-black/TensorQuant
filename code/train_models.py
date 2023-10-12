@@ -185,9 +185,9 @@ def random_forest_classifier(df):
 
         # Initialize GridSearchCV
         #clf = SVC(probability=True, C=50)
-        clf =RandomForestClassifier(n_estimators=1000, weights=weight_data)
+        clf =RandomForestClassifier(n_estimators=1000)
         #grid_search = GridSearchCV(clf, param_grid,refit=True, verbose=3, n_jobs=-1)
-        clf.fit(X_train, y_train)
+        clf.fit(X_train, y_train, sample_weight=weight_data)
 
         # Use the best estimator to predict
         #best_svm = grid_search.best_estimator_
