@@ -47,7 +47,13 @@ def random_forest_classifier(df):
               'kernel': ['rbf']} 
 
     # Training and Predicting for each split
-    for train, test, weights in zip(train_datasets[-1], test_datasets[-1], weights[-1]):
+    for train, test, weights in zip(train_datasets, test_datasets, weights):
+        train = train_datasets.iloc[-1]
+        test = test_datasets.iloc[-1]
+        weight = weights.iloc[-1] 
+        
+        
+        
         X_train = train[feature_cols]
         y_train = train[target_col]
         X_test = test[feature_cols]
