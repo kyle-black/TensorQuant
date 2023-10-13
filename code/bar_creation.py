@@ -68,7 +68,7 @@ def get_volume_bars(ohlc_df, lookback_period):
 
     # The threshold is the running total of rolling means
     threshold = rolling_mean.cumsum()
-
+    #threshold = 5000
     # Compare cumulative volume with the rolling threshold
     idx = cum_volume >= threshold
 
@@ -96,8 +96,14 @@ def get_dollar_bars(time_bars, dollar_threshold):
         # Get the timestamp, open, high, low, close, and volume of the next bar
         next_close, next_high, next_low, next_open, next_timestamp, next_volume = [time_bars[i][k] for k in ['Close', 'High', 'Low', 'Open', 'Date', 'Volume']]
 
+        # Assuming next_timestamp is your UNIX timestamp
+        #next_timestamp_dt = datetime.fromtimestamp(next_timestamp, "Y-%m-%d")
+#        next_timestamp = str(next_timestamp)
+        next_timestamp_dt = datetime.utcfromtimestamp(next_timestamp)
+
+        next_timestamp_dt = next_timestamp_dt.strftime('%Y-%m-%d %H:%M:%S')
         # Convert the string timestamp to a datetime object
-        next_timestamp_dt = datetime.strptime(next_timestamp, "%Y-%m-%d")
+        #next_timestamp_dt = datetime.strptime(next_timestamp, "%Y-%m-%d")
 
         # Get the midpoint price of the next bar (the average of the open and the close)
         midpoint_price = ((next_open) + (next_close))/2
@@ -115,7 +121,7 @@ def get_dollar_bars(time_bars, dollar_threshold):
             bar_timestamp = next_timestamp_dt + timedelta(minutes=1)
             
             # Convert the datetime object to the desired format
-            bar_timestamp_str = bar_timestamp.strftime("%Y-%m-%d")
+            bar_timestamp_str = bar_timestamp.strftime("%Y-%m-%d %H:%M:%S")
 
             # Add a new dollar bar to the list of dollar bars
             dollar_bars += [{'Date': bar_timestamp_str, 'Open': next_open, 'High': running_high, 'Low': running_low, 'Close': next_close}]

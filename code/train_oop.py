@@ -33,14 +33,14 @@ class CreateBars:
         # Check if time_bar_df has been created, if not, create it
         if self.time_bar_df is None:
             self.time_bars()
-        return bc.get_volume_bars(self.time_bar_df, 10)
+        return bc.get_volume_bars(self.time_bar_df, 200)
     
 
     def dollar_bars(self):
         # Check if time_bar_df has been created, if not, create it
         if self.time_bar_df is None:
             self.time_bars()
-        return bc.get_dollar_bars(self.time_bar_df, 10e+10)
+        return bc.get_dollar_bars(self.time_bar_df, 10000)
     
     
 class Analysis:
@@ -131,7 +131,7 @@ class Model:
 
 
 if __name__ == "__main__":
-    stock = pd.read_csv('data/EURUSD.csv')
+    stock = pd.read_csv('data/EURUSD60.csv')
     stock.dropna(inplace=True)
 
     #print(stock.isna().any())
@@ -146,17 +146,17 @@ if __name__ == "__main__":
     time_bars_df = bar_creator.time_bars()
 
     
-    #vol_bars_df = bar_creator.vol_bars()
+    vol_bars_df = bar_creator.vol_bars()
     #dollar_bars_df = bar_creator.dollar_bars()
 
-
+    print(vol_bars_df)
     #dollar_bars_df.to_csv('dol_bars.csv')
 
     
     
     
    
-
+    
     
    # analysis_instance_time = Analysis(time_bars_df)
     #print("Std Dev of Time Bars:", analysis_instance_time.std_dev())
@@ -165,8 +165,8 @@ if __name__ == "__main__":
 
     #print('ACF Statistic:', analysis_instance_time.acf() )
 
-
-    feature_instance_time = FeatureMaker(time_bars_df, 30)
+    feature_instance_time = FeatureMaker(vol_bars_df, 30)
+    #feature_instance_time = FeatureMaker(time_bars_df, 30)
     feature_bars =feature_instance_time.feature_add()
     feature_instance_time.elbow_()
 
