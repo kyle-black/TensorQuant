@@ -19,9 +19,12 @@ import elbow_plot
 import prediction_fit
 import get_data
 from datetime import datetime
-import barriers_lower
-import barriers_upper
 
+import live_data
+
+from redis_connect import redis_connection
+import time
+import schedule
 
 class CreateBars:
     def __init__(self, raw_bars):
@@ -44,7 +47,7 @@ class CreateBars:
         # Check if time_bar_df has been created, if not, create it
         if self.time_bar_df is None:
             self.time_bars()
-        return bc.get_dollar_bars(self.time_bar_df, 10e+10)
+        return bc.get_dollar_bars_P(self.time_bar_df, 2000)
     
     
 class Analysis:
@@ -104,10 +107,8 @@ class Labeling:
         
 
     def triple_barriers(self):
-        self.triple_result_upper =barriers_upper.apply_triple_barrier(self.bars_df,[1,1,1], 30)
-        self.triple_result_lower = barriers_lower.apply_triple_barrier(self.bars_df,[1,1,1], 30)
-
-        return self.triple_result_upper, self.triple_result_lower
+        self.triple_result =barriers.apply_triple_barrier_P(self.bars_df,[1,1,1], 90)
+        return self.triple_result
     
     def sample_weights(self):
         self.triple_result = self.triple_barriers()
@@ -131,31 +132,38 @@ class Model:
 
     def predict_values(self):
         self.predictions, self.probas =prediction_fit.make_predictions_up(self.symbol,self.bars_df)
-        self.predictions_dwn, self.probas_dwn =prediction_fit.make_predictions_dwn(self.symbol,self.bars_df)
-        return self.predictions, self.probas, self.predictions_dwn, self.probas_dwn, self.bars_df['upper_barrier'], self.bars_df['lower_barrier'], self.bars_df['price'], self.bars_df['volatility']
+       # self.predictions_dwn, self.probas_dwn =prediction_fit.make_predictions_dwn(self.symbol,self.bars_df)
+        return self.predictions, self.probas, self.bars_df['upper_barrier'], self.bars_df['lower_barrier'], self.bars_df['Close']
 
     
 
 
 
 
-if __name__ == "__main__":
+#if __name__ == "__main__":
 
-    symbol = 'SPY'
-    stock = get_data.get_json(symbol)
+
+def run_predictions():
+    symbol = 'EURUSD'
+    #stock = get_data.get_json(symbol)
+
+    stock = live_data.latest_data()
     #stock = pd.read_csv('data/SPY_new.csv')
     
-    stock['Date'] = stock['Date'].dt.strftime('%Y-%m-%d')
+    #stock['Date'] = stock['Date'].dt.strftime('%Y-%m-%d')
     #print(type(stock['Date'][0]))
-    stock = stock.iloc[::-1]
+    stock = stock.iloc[::]
     bar_creator = CreateBars(stock)
     
     
     
-    time_bars_df = bar_creator.time_bars()
+    dollar_bars_df = bar_creator.dollar_bars()
    
     
-    feature_instance_time = FeatureMaker(time_bars_df, 30)
+    feature_instance_time = FeatureMaker(dollar_bars_df, 30)
+    
+    #print(dollar_bars_df)
+    
     feature_bars =feature_instance_time.feature_add()
     feature_instance_time.elbow_()
 
@@ -168,28 +176,80 @@ if __name__ == "__main__":
        'RSI']]
     
     label_instance_time =Labeling(feature_bars)
-    label_instance_upper, label_instance_lower = label_instance_time.triple_barriers()
+    label_instance_time = label_instance_time.triple_barriers()
     
 
     print(label_instance_time)
     
     model =Model(symbol,label_instance_time)
     print(model.predict_values())
-    
-    
 
-   
-
-
-
-
-
-
-
-
-
-
+    output= model.predict_values()
     
 
+
+    ################################# Parse Model output
+    hard_predictions = output[0]
+    last_hard_prediction = hard_predictions[-1]
+    prob_predictions = output[1]
+    dwn_prob = prob_predictions[-1][0]
+    up_prob = prob_predictions[-1][2]
+    neutral_prob = prob_predictions[-1][1]
     
+    upper_barriers = output[2]
+    lower_barriers = output[3]
+    closes = output[4]
+
+    last_lower_barrier = round(lower_barriers.iloc[-1], 4)
+    last_upper_barrier = round(upper_barriers.iloc[-1], 4)
+    last_close = closes.iloc[-1]
+    date = closes.index[-1]
+    date = date.strftime('%H:%M:%S')
+
+    print(f'last close price:{last_close}\n last_upper_barrier: {last_upper_barrier} \n last_lower_barrier: {last_lower_barrier} \n predict_up: {up_prob} \n predict_down:{dwn_prob} \n neutral_prob:{neutral_prob} \n hard_prediction:{last_hard_prediction}' )
+
+    output_dict = {}
+
+    output_dict[date] = {'close': last_close, 'up_prob':up_prob,'dwn_prob':dwn_prob, 'neutral_prob':neutral_prob, 'upper_barrier':last_upper_barrier, 'lower_barrier':last_lower_barrier, 'hard_prediction':last_hard_prediction}
+
+    print(output_dict)
+
+    if redis_connection.exists(date):
+        print(f' {date} is an already existing bar')
+    else:
+        print(f'New Bar Created at {date}')
+
+    
+
+    
+    
+    
+    res1 = redis_connection.hset(
+    date,
+    mapping={
+        'close': last_close,
+        'up_prob': up_prob,
+        'dwn_prob': dwn_prob,
+        'neutral_prob': neutral_prob,
+        'upper_barrier': last_upper_barrier,
+        'lower_barrier': last_lower_barrier,
+        'hard_prediction': last_hard_prediction,
+        'time': date
+    },
+)
+    
+
+
+    res4 = redis_connection.hgetall(date)
+    print('redis:',res4)
+
+
+schedule.every(5).minutes.do(run_predictions)
+
+while True:
+    schedule.run_pending()
+    time.sleep(1)
+
+
+
 

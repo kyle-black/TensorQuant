@@ -68,7 +68,7 @@ stock_market_holidays = [
     # 2023
     "2023-01-02", "2023-01-16", "2023-02-20", "2023-04-07", "2023-05-29", "2023-07-04", "2023-09-04", "2023-11-23", "2023-12-25",
 ]
-
+'''
 def apply_triple_barrier(df, pt_sl, num_days_active):
     """
     Apply the triple barrier method to label events.
@@ -89,7 +89,7 @@ def apply_triple_barrier(df, pt_sl, num_days_active):
     df.set_index('Date', inplace=True)
     
     
-    df.index = pd.to_datetime(df.index)
+    df.index = pd.to_datetime(df.index, unit='s')
 
     price_series = df['Close'].copy()
    
@@ -128,8 +128,37 @@ def apply_triple_barrier(df, pt_sl, num_days_active):
 
         df_temp = df.loc[timestamp:t1_date]
         
-        touch_upper = df_temp[df_temp['High'] >= upper_barrier].index.min()
-        touch_lower = df_temp[df_temp['Low'] <= lower_barrier].index.min()
+        
+        touch_uppers = df_temp[df_temp['High'] >= upper_barrier].index
+        
+        if len (touch_uppers)  > 0:
+            if touch_uppers[-1] == timestamp and len(touch_uppers) > 1:
+                touch_upper =touch_uppers[-2] 
+
+            elif touch_uppers[-1] != timestamp:
+                touch_upper = touch_uppers[-1]
+            else: touch_upper =pd.NaT
+        else: touch_upper = pd.NaT
+
+        
+        
+        touch_lowers = df_temp[df_temp['Low'] <= lower_barrier].index
+        
+
+        if len (touch_lowers)  > 0:
+            if touch_lowers[-1] == timestamp and len(touch_lowers) > 1:
+                touch_lower = touch_lowers[-2]
+            elif touch_lowers[-1] != timestamp:
+                touch_lower = touch_lowers[-1]
+            else: touch_lower =pd.NaT
+        else: touch_lower = pd.NaT
+        
+        
+        
+        #touch_upper = df_temp[df_temp['High'] >= upper_barrier].index.min()
+
+        
+        #touch_lower = df_temp[df_temp['Low'] <= lower_barrier].index.min()
 
        # cross_above_ma = df_temp[(df_temp['Close'].shift(1) < df_temp['Middle_Band']) & (df_temp['Close'] > df_temp['Middle_Band'])].index.min()
        # cross_below_ma = df_temp[(df_temp['Close'].shift(1) > df_temp['Middle_Band']) & (df_temp['Close'] < df_temp['Middle_Band'])].index.min()
@@ -157,8 +186,164 @@ def apply_triple_barrier(df, pt_sl, num_days_active):
     df_merged = df.join(barriers, how='left')
     return df_merged
 
+'''
+def apply_triple_barrier(df, pt_sl, num_days_active):
+    """
+    Apply the triple barrier method to label events.
+
+    Parameters:
+    df: DataFrame with price data.
+    pt_sl: List of multipliers for profit taking and stop-loss.
+    num_days_active: Number of days the barrier should be kept active.
+
+    Returns:
+    DataFrame with events labeled.
+    """
+    # Ensure the index is a DatetimeIndex
+    #if not isinstance(df.index, pd.DatetimeIndex):
+    #    print("Index should be of DatetimeIndex type")
+    #    return
+
+    
+    
+    df.index = pd.to_datetime(df.Date)
+    
+    # Compute daily volatility
+    daily_volatility = df['Close'].pct_change().ewm(span=num_days_active).std()
+
+    #daily_volatility = df['Close'].pct_change(periods=num_days_active).std()
+
+    # Initialize the barriers DataFrame
+    barriers = pd.DataFrame(index=df.index)
+
+    for timestamp, data in df.iterrows():
+        price = data['Close']
+        volatility = daily_volatility.loc[timestamp]
+
+        upper_barrier = price * (1 + pt_sl[0] * volatility)
+        lower_barrier = price * (1 - pt_sl[1] * volatility)
+
+        # Assign upper and lower barriers to the DataFrame
+        barriers.at[timestamp, 'upper_barrier'] = upper_barrier
+        barriers.at[timestamp, 'lower_barrier'] = lower_barrier
+
+        # Compute vertical barrier
+        t1_date = timestamp + pd.Timedelta(hours=num_days_active)
+        if t1_date > df.index[-1]:
+            t1_date = df.index[-1]  # Adjust if it goes beyond the last date in the index
+        
+        barriers.at[timestamp, 't1'] = t1_date
+
+        # Define a smaller dataframe slice between current timestamp and the vertical barrier
+        df_temp = df.loc[timestamp:].iloc[1:]  # Exclude the current bar
+
+        # Find timestamps where the price crossed the barriers
+        touch_uppers = df_temp[df_temp['High'] >= upper_barrier].index
+        touch_lowers = df_temp[df_temp['Low'] <= lower_barrier].index
+
+        # Get the first touch on each barrier if it exists
+        touch_upper = touch_uppers[0] if not touch_uppers.empty else pd.NaT
+        touch_lower = touch_lowers[0] if not touch_lowers.empty else pd.NaT
+
+        barriers.at[timestamp, 'touch_upper'] = touch_upper
+        barriers.at[timestamp, 'touch_lower'] = touch_lower
+
+        # Determine the event label based on barrier touch
+        if touch_upper != pd.NaT and (touch_lower == pd.NaT or touch_upper < touch_lower) and touch_upper < t1_date:
+            barriers.at[timestamp, 'label'] = 1  # upper barrier touched first
+        elif touch_lower != pd.NaT and (touch_upper == pd.NaT or touch_lower < touch_upper) and touch_lower < t1_date:
+             barriers.at[timestamp, 'label'] = -1  # lower barrier touched first
+        else:
+            barriers.at[timestamp, 'label'] = 0 
+
+       # else:
+       #     barriers.at[timestamp, 'label'] = 0  # No barrier was touched or it's undetermined
+
+    # Merging the barriers with the original data
+    df_merged = df.join(barriers, how='left')
+    #df_merged = df_merged[:6000]
+    return df_merged
 
 
+def apply_triple_barrier_P(df, pt_sl, num_days_active):
+    """
+    Apply the triple barrier method to label events.
 
+    Parameters:
+    df: DataFrame with price data.
+    pt_sl: List of multipliers for profit taking and stop-loss.
+    num_days_active: Number of days the barrier should be kept active.
 
+    Returns:
+    DataFrame with events labeled.
+    """
+    # Ensure the index is a DatetimeIndex
+    #if not isinstance(df.index, pd.DatetimeIndex):
+    #    print("Index should be of DatetimeIndex type")
+    #    return
 
+    
+    
+#    df.index = pd.to_datetime(df.Date, unit = 's')
+
+    df.index = pd.to_datetime(df['Date'])
+
+    
+    # Compute daily volatility
+    daily_volatility = df['Close'].pct_change().ewm(span=num_days_active).std()
+
+    #daily_volatility = df['Close'].pct_change(periods=num_days_active).std()
+
+    # Initialize the barriers DataFrame
+    barriers = pd.DataFrame(index=df.index)
+
+    for timestamp, data in df.iterrows():
+        price = data['Close']
+        volatility = daily_volatility.loc[timestamp]
+
+        upper_barrier = price * (1 + pt_sl[0] * volatility)
+        lower_barrier = price * (1 - pt_sl[1] * volatility)
+
+        # Assign upper and lower barriers to the DataFrame
+        barriers.at[timestamp, 'upper_barrier'] = upper_barrier
+        barriers.at[timestamp, 'lower_barrier'] = lower_barrier
+
+        # Compute vertical barrier
+        #t1_date = timestamp + pd.Timedelta(hours=num_days_active)
+
+        t1_date = timestamp + pd.Timedelta(minutes=num_days_active ) 
+        if t1_date > df.index[-1]:
+            t1_date = df.index[-1]  # Adjust if it goes beyond the last date in the index
+        
+        barriers.at[timestamp, 't1'] = t1_date
+
+        # Define a smaller dataframe slice between current timestamp and the vertical barrier
+        df_temp = df.loc[timestamp:].iloc[1:]  # Exclude the current bar
+
+        # Find timestamps where the price crossed the barriers
+        touch_uppers = df_temp[df_temp['Close'] >= upper_barrier].index
+        touch_lowers = df_temp[df_temp['Close'] <= lower_barrier].index
+
+        # Get the first touch on each barrier if it exists
+        touch_upper = touch_uppers[0] if not touch_uppers.empty else pd.NaT
+        touch_lower = touch_lowers[0] if not touch_lowers.empty else pd.NaT
+
+        barriers.at[timestamp, 'touch_upper'] = touch_upper
+        barriers.at[timestamp, 'touch_lower'] = touch_lower
+
+        # Determine the event label based on barrier touch
+        if touch_upper != pd.NaT and (touch_lower == pd.NaT or touch_upper < touch_lower) and touch_upper < t1_date:
+            barriers.at[timestamp, 'label'] = 1  # upper barrier touched first
+        elif touch_lower != pd.NaT and (touch_upper == pd.NaT or touch_lower < touch_upper) and touch_lower < t1_date:
+             barriers.at[timestamp, 'label'] = -1  # lower barrier touched first
+        else:
+            barriers.at[timestamp, 'label'] = 0 
+
+       # else:
+       #     barriers.at[timestamp, 'label'] = 0  # No barrier was touched or it's undetermined
+
+    # Merging the barriers with the original data
+    df_merged = df.join(barriers, how='left')
+    #df_merged = df_merged[:6000]
+    return df_merged
+    

@@ -8,6 +8,39 @@ def time_series_split(data, n_splits=3):
 
 def purged_walk_forward_split_with_embargo(data, initial_train_size, test_size, gap=5, embargo_size=3):
     """
+    ... [previous docstring content] ...
+    """
+    start_train = 0
+    start_test = initial_train_size
+    
+    data_length = len(data)  # It's efficient to calculate the length once beforehand.
+
+    while start_test + test_size + embargo_size <= data_length:
+        train_indices = list(range(start_train, start_test))
+        test_indices = list(range(start_test + gap, start_test + gap + test_size))
+        
+        # Clipping indices to ensure they are within valid range.
+        train_indices = [index for index in train_indices if index < data_length]
+        test_indices = [index for index in test_indices if index < data_length]
+
+        # Check if there are enough indices to proceed. If not, you might want to break the loop or handle it accordingly.
+        if not train_indices or not test_indices:
+            print("Not enough data points for a valid train/test split at this step.")
+            # You can choose to break, continue, or handle this situation in another appropriate manner.
+            break
+
+        yield train_indices, test_indices
+        
+        start_test += test_size + embargo_size
+
+        # If the new start point for the test set is out of bounds, you might want to break the loop here too.
+        if start_test + test_size + embargo_size > data_length:
+            print("Reached the end of data; can't create more splits.")
+            break
+
+'''
+def purged_walk_forward_split_with_embargo(data, initial_train_size, test_size, gap=5, embargo_size=3):
+    """
     Parameters:
     data: your time series data
     initial_train_size: initial size of the training set
@@ -28,7 +61,7 @@ def purged_walk_forward_split_with_embargo(data, initial_train_size, test_size, 
         
         start_test += test_size + embargo_size
 
-
+'''
 def time_decay_weights(data, decay_factor=0.95):
     """
     Parameters:

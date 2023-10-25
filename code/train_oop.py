@@ -33,14 +33,14 @@ class CreateBars:
         # Check if time_bar_df has been created, if not, create it
         if self.time_bar_df is None:
             self.time_bars()
-        return bc.get_volume_bars(self.time_bar_df, 200)
+        return bc.get_volume_bars(self.time_bar_df, 1000)
     
 
     def dollar_bars(self):
         # Check if time_bar_df has been created, if not, create it
         if self.time_bar_df is None:
             self.time_bars()
-        return bc.get_dollar_bars(self.time_bar_df, 10000)
+        return bc.get_dollar_bars(self.time_bar_df, 2000)
     
     
 class Analysis:
@@ -100,7 +100,7 @@ class Labeling:
         
 
     def triple_barriers(self):
-        self.triple_result =barriers.apply_triple_barrier(self.bars_df,[1,1,1], 30)
+        self.triple_result =barriers.apply_triple_barrier(self.bars_df,[1,1,1], 24)
         return self.triple_result
     
     def sample_weights(self):
@@ -119,7 +119,7 @@ class Model:
 
     def train_model(self):
         #output =adaboost_classifier(self.bars_df)
-        #output = random_forest_classifier(self.bars_df)
+        #output = support_vector_classifier(self.bars_df)
         output =random_forest_classifier(self.bars_df)
      
         #output =random_forest_anomaly_detector(self.bars_df)
@@ -131,7 +131,7 @@ class Model:
 
 
 if __name__ == "__main__":
-    stock = pd.read_csv('data/EURUSD60.csv')
+    stock = pd.read_csv('data/EURUSD5_new.csv')
     stock.dropna(inplace=True)
 
     #print(stock.isna().any())
@@ -147,9 +147,9 @@ if __name__ == "__main__":
 
     
     vol_bars_df = bar_creator.vol_bars()
-    #dollar_bars_df = bar_creator.dollar_bars()
+    dollar_bars_df = bar_creator.dollar_bars()
 
-    print(vol_bars_df)
+   # print(dollar_bars_df)
     #dollar_bars_df.to_csv('dol_bars.csv')
 
     
@@ -165,10 +165,10 @@ if __name__ == "__main__":
 
     #print('ACF Statistic:', analysis_instance_time.acf() )
 
-    feature_instance_time = FeatureMaker(vol_bars_df, 30)
+    feature_instance_ = FeatureMaker(dollar_bars_df, 24)
     #feature_instance_time = FeatureMaker(time_bars_df, 30)
-    feature_bars =feature_instance_time.feature_add()
-    feature_instance_time.elbow_()
+    feature_bars =feature_instance_.feature_add()
+    feature_instance_.elbow_()
 
 
 
@@ -184,16 +184,17 @@ if __name__ == "__main__":
    # print(feature_bars.columns)
     
     
-    label_instance_time =Labeling(feature_bars)
-    label_instance_time = label_instance_time.triple_barriers()
+    label_instance_ =Labeling(feature_bars)
+    label_instance_ = label_instance_.triple_barriers()
     
-    print(label_instance_time)
+    print(label_instance_)
+    label_instance_.to_csv('labels.csv')
     
     #df, weights = label_instance_time.sample_weights()
     #print(label_instance_time)
    # print(weights)
 
-    model =Model(label_instance_time)
+    model =Model(label_instance_)
     
     print(model.train_model())
 

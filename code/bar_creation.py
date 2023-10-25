@@ -98,10 +98,10 @@ def get_dollar_bars(time_bars, dollar_threshold):
 
         # Assuming next_timestamp is your UNIX timestamp
         #next_timestamp_dt = datetime.fromtimestamp(next_timestamp, "Y-%m-%d")
-#        next_timestamp = str(next_timestamp)
+        #next_timestamp = str(next_timestamp)
         next_timestamp_dt = datetime.utcfromtimestamp(next_timestamp)
 
-        next_timestamp_dt = next_timestamp_dt.strftime('%Y-%m-%d %H:%M:%S')
+       # next_timestamp_dt = next_timestamp_dt.strftime('%Y-%m-%d %H:%M:%S')
         # Convert the string timestamp to a datetime object
         #next_timestamp_dt = datetime.strptime(next_timestamp, "%Y-%m-%d")
 
@@ -145,6 +145,66 @@ def get_dollar_bars(time_bars, dollar_threshold):
 
 
     return dollar_bars
+
+
+def get_dollar_bars_P(time_bars, dollar_threshold):
+    # Convert DataFrame to list of dictionaries if it's not already in that format
+    if not isinstance(time_bars, list):
+        time_bars = time_bars.to_dict('records') 
+
+    dollar_bars = []
+    running_volume = 0
+    running_high, running_low = 0, math.inf
+
+    for bar in time_bars:
+        # Extract necessary information from the current bar
+        next_close = bar['Close']
+        next_high = bar['High']
+        next_low = bar['Low']
+        next_open = bar['Open']
+        next_timestamp = bar['Date']  # assuming 'Date' column contains Timestamp objects
+        next_volume = bar['Volume']
+
+        # Convert Timestamp to datetime object (no need for UNIX timestamp conversion)
+        next_timestamp_dt = next_timestamp.to_pydatetime() if isinstance(next_timestamp, pd.Timestamp) else next_timestamp
+
+        midpoint_price = (next_open + next_close) / 2
+        dollar_volume = next_volume * midpoint_price
+
+        running_high = max(running_high, next_high)
+        running_low = min(running_low, next_low)
+
+        # Check if accumulated volume exceeds the threshold
+        if dollar_volume + running_volume >= dollar_threshold:
+            # Finalize the current dollar bar
+            bar_timestamp = next_timestamp_dt  # the end time of the bar is the current timestamp
+            bar_timestamp_str = bar_timestamp.strftime("%Y-%m-%d %H:%M:%S")
+
+            new_dollar_bar = {
+                'Date': bar_timestamp_str,
+                'Open': next_open,
+                'High': running_high,
+                'Low': running_low,
+                'Close': next_close,
+                'Volume': next_volume
+
+            }
+            dollar_bars.append(new_dollar_bar)
+
+            # Reset tracking variables
+            running_volume = 0
+            running_high, running_low = 0, math.inf
+        else:
+            running_volume += dollar_volume
+
+    # Convert the list of dollar bars into a DataFrame and calculate daily returns
+    dollar_bars_df = pd.DataFrame(dollar_bars)
+    dollar_bars_df['Daily_Returns'] = dollar_bars_df['Close'].pct_change()
+
+    return dollar_bars_df
+
+
+
 
 
 
