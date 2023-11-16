@@ -10,7 +10,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
 import joblib
 import numpy as np
-import tensorflow as tf
+#import tensorflow as tf
 
 import numpy as np
 import pandas as pd
@@ -20,8 +20,8 @@ from sklearn.metrics import classification_report, confusion_matrix
 #from sklearn.externals import joblib
 # Import necessary keras modules
 
-from keras.models import Sequential
-from keras.layers import Dense, Dropout
+#from keras.models import Sequential
+#from keras.layers import Dense, Dropout
 #from keras.scikit_learn import KerasClassifier
 from scikeras.wrappers import KerasClassifier
 from keras.utils import to_categorical
