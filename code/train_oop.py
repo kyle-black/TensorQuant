@@ -40,7 +40,7 @@ class CreateBars:
         # Check if time_bar_df has been created, if not, create it
         if self.time_bar_df is None:
             self.time_bars()
-        return bc.get_dollar_bars(self.time_bar_df, 2000)
+        return bc.get_dollar_bars(self.time_bar_df, 16000)
     
     
 class Analysis:
@@ -115,15 +115,28 @@ class Labeling:
 class Model:
     def __init__(self, bars_df):
         self.bars_df = bars_df
+        self.bar_shape = bars_df.shape
         #self.weights =weights
 
     def train_model(self):
         #output =adaboost_classifier(self.bars_df)
         #output = support_vector_classifier(self.bars_df)
         output =random_forest_classifier(self.bars_df)
-     
+        #output = neural_network_classifier(self.bars_df)
         #output =random_forest_anomaly_detector(self.bars_df)
         return output
+    
+   
+
+
+
+
+            
+            
+        
+        
+
+
 
     
 
@@ -131,7 +144,7 @@ class Model:
 
 
 if __name__ == "__main__":
-    stock = pd.read_csv('data/EURUSD5_new.csv')
+    stock = pd.read_csv('data/EURUSD60_New1.csv')
     stock.dropna(inplace=True)
 
     #print(stock.isna().any())

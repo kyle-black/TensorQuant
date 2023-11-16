@@ -26,13 +26,13 @@ def make_predictions_up(symbol, new_data: pd.DataFrame) -> pd.Series:
     """
 
     # Load the trained model, PCA, and scaler
-    clf = joblib.load(f'models/{symbol}/random_forest_model_up_{symbol}.pkl')
-    pca = joblib.load(f'models/{symbol}/pca_transformation_up_{symbol}.pkl')
-    scaler = joblib.load(f'models/{symbol}/scaler_{symbol}.pkl')
+    clf = joblib.load(f'models/EURUSD/random_forest_model_up_{symbol}.pkl')
+    pca = joblib.load(f'models/EURUSD/pca_transformation_up_{symbol}.pkl')
+    scaler = joblib.load(f'models/EURUSD/scaler_EURUSD.pkl')
     
     # Prepare the new data
     feature_cols = ['Daily_Returns', 'Middle_Band', 'Upper_Band', 'Lower_Band',
-                    'Log_Returns', 'MACD', 'Signal_Line_MACD', 'RSI','SpreadOC','SpreadLH']
+                    'Log_Returns', 'MACD', 'Signal_Line_MACD', 'RSI','SpreadOC','SpreadLH','SMI']
     X_new = new_data[feature_cols]
     
     # Standardize the new data using the saved scaler
@@ -66,7 +66,7 @@ def make_predictions_dwn(symbol,new_data: pd.DataFrame) -> pd.Series:
     
     # Prepare the new data
     feature_cols = ['Daily_Returns', 'Middle_Band', 'Upper_Band', 'Lower_Band',
-                    'Log_Returns', 'MACD', 'Signal_Line_MACD', 'RSI','SpreadOC','SpreadLH']
+                    'Log_Returns', 'MACD', 'Signal_Line_MACD', 'RSI','SpreadOC','SpreadLH','SMI']
     X_new = new_data[feature_cols]
     
     # Standardize the new data using the saved scaler

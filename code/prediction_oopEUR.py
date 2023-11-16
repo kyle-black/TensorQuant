@@ -107,7 +107,7 @@ class Labeling:
         
 
     def triple_barriers(self):
-        self.triple_result =barriers.apply_triple_barrier_P(self.bars_df,[1,1,1], 90)
+        self.triple_result =barriers.apply_triple_barrier_P(self.bars_df,[1,1,1], 24)
         return self.triple_result
     
     def sample_weights(self):
@@ -147,7 +147,7 @@ def run_predictions():
     symbol = 'EURUSD'
     #stock = get_data.get_json(symbol)
 
-    stock = live_data.latest_data()
+    stock = live_data.latest_data_5()
     #stock = pd.read_csv('data/SPY_new.csv')
     
     #stock['Date'] = stock['Date'].dt.strftime('%Y-%m-%d')
@@ -160,7 +160,7 @@ def run_predictions():
     dollar_bars_df = bar_creator.dollar_bars()
    
     
-    feature_instance_time = FeatureMaker(dollar_bars_df, 30)
+    feature_instance_time = FeatureMaker(dollar_bars_df, 24)
     
     #print(dollar_bars_df)
     
@@ -173,7 +173,7 @@ def run_predictions():
     feature_bars =feature_bars[['Date', 'Open', 'High', 'Low', 'Close', 'Volume',
        'Daily_Returns', 'Middle_Band', 'Upper_Band', 'Lower_Band',
        'Log_Returns', 'SpreadOC', 'SpreadLH', 'MACD', 'Signal_Line_MACD',
-       'RSI']]
+       'RSI','SMI']]
     
     label_instance_time =Labeling(feature_bars)
     label_instance_time = label_instance_time.triple_barriers()
@@ -244,7 +244,7 @@ def run_predictions():
     print('redis:',res4)
 
 
-schedule.every(5).minutes.do(run_predictions)
+schedule.every(1).minutes.do(run_predictions)
 
 while True:
     schedule.run_pending()
